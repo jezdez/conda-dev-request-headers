@@ -17,8 +17,6 @@ if TYPE_CHECKING:
 
 from conda.plugins.types import CondaRequestHeader
 
-INLINE_RULES_ENV_VAR: Final = "CONDA_DEV_REQUEST_HEADERS"
-RULES_FILE_ENV_VAR: Final = "CONDA_DEV_REQUEST_HEADERS_FILE"
 RULES_SETTING: Final = "dev_request_headers"
 RULES_FILE_SETTING: Final = "dev_request_headers_file"
 HEADER_NAME_RE: Final = re.compile(r"^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$")
@@ -194,13 +192,9 @@ class HeaderConfig:
             setting_file = setting_file or ""
 
         rules = []
-        rules.extend(cls.parse_lines(setting_rules, environ))
         if setting_file:
             rules.extend(cls.parse_file(setting_file, environ))
-        if env_file := environ.get(RULES_FILE_ENV_VAR):
-            rules.extend(cls.parse_file(env_file, environ))
-        if inline_rules := environ.get(INLINE_RULES_ENV_VAR):
-            rules.extend(cls.parse_lines(inline_rules.splitlines(), environ))
+        rules.extend(cls.parse_lines(setting_rules, environ))
         return cls(rules=tuple(rules))
 
     @classmethod

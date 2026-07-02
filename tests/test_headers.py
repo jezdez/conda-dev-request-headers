@@ -5,8 +5,6 @@ from __future__ import annotations
 import pytest
 
 from conda_dev_request_headers.headers import (
-    INLINE_RULES_ENV_VAR,
-    RULES_FILE_ENV_VAR,
     HeaderConfig,
     HeaderRule,
     HeaderSelector,
@@ -201,7 +199,7 @@ def test_config_ignores_invalid_rules_and_headers() -> None:
     ]
 
 
-def test_config_reads_explicit_environment_file(tmp_path) -> None:
+def test_config_reads_setting_file(tmp_path) -> None:
     rules_file = tmp_path / "headers.txt"
     rules_file.write_text(
         'repo.anaconda.com Authorization "Bearer ${TOKEN}"\n',
@@ -209,11 +207,9 @@ def test_config_reads_explicit_environment_file(tmp_path) -> None:
     )
 
     config = HeaderConfig.from_sources(
-        environ={
-            RULES_FILE_ENV_VAR: str(rules_file),
-            "TOKEN": "secret",
-        },
+        environ={"TOKEN": "secret"},
         setting_rules=(),
+        setting_file=str(rules_file),
     )
 
     assert header_pairs(config.session_headers_for("repo.anaconda.com")) == [
@@ -221,15 +217,19 @@ def test_config_reads_explicit_environment_file(tmp_path) -> None:
     ]
 
 
-def test_config_reads_inline_environment_rules() -> None:
+def test_config_setting_rules_override_setting_file(tmp_path) -> None:
+    rules_file = tmp_path / "headers.txt"
+    rules_file.write_text(
+        "repo.anaconda.com X-Shared file\n",
+        encoding="utf-8",
+    )
+
     config = HeaderConfig.from_sources(
-        environ={
-            INLINE_RULES_ENV_VAR: 'repo.anaconda.com Authorization "Bearer ${TOKEN}"',
-            "TOKEN": "secret",
-        },
-        setting_rules=(),
+        environ={},
+        setting_rules=("repo.anaconda.com X-Shared inline",),
+        setting_file=str(rules_file),
     )
 
     assert header_pairs(config.session_headers_for("repo.anaconda.com")) == [
-        ("authorization", "Bearer secret")
+        ("x-shared", "inline")
     ]

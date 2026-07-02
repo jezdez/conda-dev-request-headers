@@ -37,7 +37,7 @@ packages.example.test/private X-Channel-Scope private
 Then point the plugin at it:
 
 ```shell
-export CONDA_DEV_REQUEST_HEADERS_FILE="$HOME/.config/conda/dev-request-headers"
+export CONDA_PLUGINS_DEV_REQUEST_HEADERS_FILE="$HOME/.config/conda/dev-request-headers"
 export PRIVATE_CHANNEL_TOKEN="development-token"
 ```
 
@@ -63,10 +63,10 @@ plugins:
 For short-lived CI jobs, inline line-based rules are supported:
 
 ```shell
-export CONDA_DEV_REQUEST_HEADERS='packages.example.test Authorization "Bearer ${PRIVATE_CHANNEL_TOKEN}"'
+export CONDA_PLUGINS_DEV_REQUEST_HEADERS='packages.example.test Authorization "Bearer ${PRIVATE_CHANNEL_TOKEN}"'
 ```
 
-Avoid putting literal secrets in `CONDA_DEV_REQUEST_HEADERS`; use `${...}`
+Avoid putting literal secrets in `CONDA_PLUGINS_DEV_REQUEST_HEADERS`; use `${...}`
 placeholders and pass the actual secret through your shell, CI secret store, or
 password manager.
 
@@ -84,10 +84,10 @@ cache them efficiently. Selectors with a path prefix are emitted through
 
 If multiple matching rules set the same header, later rules win. Source order is:
 
-1. `plugins.dev_request_headers` conda plugin setting
-2. `plugins.dev_request_headers_file` conda plugin setting
-3. `CONDA_DEV_REQUEST_HEADERS_FILE`
-4. `CONDA_DEV_REQUEST_HEADERS`
+1. `plugins.dev_request_headers_file` conda plugin setting, including
+   `CONDA_PLUGINS_DEV_REQUEST_HEADERS_FILE`
+2. `plugins.dev_request_headers` conda plugin setting, including
+   `CONDA_PLUGINS_DEV_REQUEST_HEADERS`
 
 ## Security Notes
 
