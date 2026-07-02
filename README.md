@@ -22,14 +22,14 @@ python -m pip install git+https://github.com/jezdez/conda-dev-request-headers.gi
 
 The recommended pattern is to keep scoped rules in trusted conda/user config and
 read secret values from named environment variables. This mirrors tools such as
-npm and pnpm, where the config names the registry and `${TOKEN}` supplies the
-secret at runtime.
+npm and pnpm, where the config names the registry and a placeholder such as
+`${PRIVATE_CHANNEL_TOKEN}` supplies the secret at runtime.
 
 Create a local rules file:
 
 ```text
 # ~/.config/conda/dev-request-headers
-packages.example.test Authorization "Bearer ${CONDA_PACKAGES_TOKEN}"
+packages.example.test Authorization "Bearer ${PRIVATE_CHANNEL_TOKEN}"
 packages.example.test/private X-Channel-Scope private
 *.internal.example.test X-Developer alice
 ```
@@ -38,8 +38,11 @@ Then point the plugin at it:
 
 ```shell
 export CONDA_DEV_REQUEST_HEADERS_FILE="$HOME/.config/conda/dev-request-headers"
-export CONDA_PACKAGES_TOKEN="development-token"
+export PRIVATE_CHANNEL_TOKEN="development-token"
 ```
+
+`PRIVATE_CHANNEL_TOKEN` is only an example name. Use whatever environment
+variable name makes sense for the service you are testing.
 
 You can also configure the file through conda's plugin settings in `.condarc`
 under `plugins.*`:
@@ -54,13 +57,13 @@ Or put non-secret rules directly in `.condarc`:
 ```yaml
 plugins:
   dev_request_headers:
-    - 'packages.example.test Authorization "Bearer ${CONDA_PACKAGES_TOKEN}"'
+    - 'packages.example.test Authorization "Bearer ${PRIVATE_CHANNEL_TOKEN}"'
 ```
 
 For short-lived CI jobs, inline line-based rules are supported:
 
 ```shell
-export CONDA_DEV_REQUEST_HEADERS='packages.example.test Authorization "Bearer ${CONDA_PACKAGES_TOKEN}"'
+export CONDA_DEV_REQUEST_HEADERS='packages.example.test Authorization "Bearer ${PRIVATE_CHANNEL_TOKEN}"'
 ```
 
 Avoid putting literal secrets in `CONDA_DEV_REQUEST_HEADERS`; use `${...}`
