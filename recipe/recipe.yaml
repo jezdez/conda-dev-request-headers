@@ -1,0 +1,53 @@
+schema_version: 1
+
+context:
+  version: "0.1.0"
+  python_min: "3.10"
+
+package:
+  name: conda-dev-request-headers
+  version: ${{ version }}
+
+source:
+  path: ..
+
+build:
+  number: 0
+  noarch: python
+  script:
+    - ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+requirements:
+  host:
+    - python ${{ python_min }}.*
+    - hatchling >=1.12.2
+    - pip
+  run:
+    - python >=${{ python_min }}
+    - conda >=26.3
+
+tests:
+  - python:
+      imports:
+        - conda_dev_request_headers
+      pip_check: true
+      python_version: ${{ python_min }}.*
+  - requirements:
+      run:
+        - python ${{ python_min }}.*
+    script:
+      - python -c "from conda_dev_request_headers.plugin import conda_session_headers; assert list(conda_session_headers('example.com')) == []"
+
+about:
+  summary: Development-only conda plugin for injecting scoped HTTP request headers
+  description: |
+    conda-dev-request-headers is a small conda plugin for local development
+    workflows that need to inject scoped HTTP headers, such as Authorization or
+    X-Api-Key, into conda network requests without patching conda itself.
+  license: BSD-3-Clause
+  license_file: LICENSE
+  repository: https://github.com/jezdez/conda-dev-request-headers
+
+extra:
+  recipe-maintainers:
+    - jezdez
